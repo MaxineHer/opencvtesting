@@ -2,7 +2,7 @@ import pymysql
 
 try:
     connection = pymysql.connect(
-        host="192.168.0.131",
+        host="10.115.4.48",
         user="root",
         password="password",
         database="fridgefinds",

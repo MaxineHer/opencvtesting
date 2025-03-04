@@ -2,6 +2,8 @@
 
 #import libraries
 import cv2
+import time
+import datetime
 #Now, let’s write the function. Instead of adding part by part, I will share the whole function with you. Since, indentation matters when writing in python, I don’t want to disorganize things by ruining the structure of the code. I will add my comments below the code.
 def get_areas(frame):
     frame = cv2.flip(frame,1)
@@ -20,10 +22,14 @@ def get_areas(frame):
         x,y,w,h = cv2.boundingRect(c)
         cv2.rectangle(frame,(x,y),(x+w,y+h),(0,255,0),2)
     #print(area)
-    outtext = "Area: " + str(area)
-    limit = 100000 # for testing purpose
-    if area > limit:  # this means that the background is greater than limit 
+    width = frame.shape[1]
+    height = frame.shape[0]
+    size = width * height
+    percent = area / size * 100
+    outtext = "Percent: " + str(percent)
+    if percent > 50:  # this means that the background is greater than limit 
         cv2.putText(frame, outtext, (00, 185), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 1, cv2.LINE_AA)
+        print("frame is empty")
     else:
         cv2.putText(frame, outtext, (00, 185), cv2.FONT_HERSHEY_SIMPLEX, 1, (225, 0, 255), 1, cv2.LINE_AA)
 # Displaying the output image
@@ -45,10 +51,12 @@ def get_thresh(frame):
         cv2.drawContours(thresh,[c], 0, (0,0,0), 2)
         x,y,w,h = cv2.boundingRect(c)
         cv2.rectangle(thresh,(x,y),(x+w,y+h),(0,0,0),2)
-    #print(area)
-    outtext = "Area: " + str(area)
-    limit = 100000 # for testing purpose
-    if area > limit:  # this means that the background is greater than limit 
+    width = frame.shape[1]
+    height = frame.shape[0]
+    size = width * height
+    percent = area / size * 100
+    outtext = "Percent: " + str(percent)
+    if percent > 50:  # this means that the background is greater than limit 
         cv2.putText(thresh, outtext, (00, 185), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 1, cv2.LINE_AA)
     else:
         cv2.putText(thresh, outtext, (00, 185), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 1, cv2.LINE_AA)
@@ -59,11 +67,17 @@ def main():
     #1
     camera = cv2.VideoCapture(0)
     ret, frame = camera.read()
+    framerate = 1
+    prev = 0
     #2
     while ret:
+        time_elapsed = time.time() - prev
         ret, frame = camera.read()
-        frame = get_thresh(frame)
-        cv2.imshow('areatest', frame)
+        if time_elapsed > 1./framerate:
+            prev = time.time()
+            frame = get_areas(frame)
+            cv2.imshow('areatest', frame)
+        #time.sleep(5)
         key = cv2.waitKey(1)
         if key == ord("Q") or key == ord("q") or key == 27:
             break

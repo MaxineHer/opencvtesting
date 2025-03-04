@@ -7,7 +7,7 @@ import pandas as pd
 import openfoodfacts
 import json
 import pymysql
-
+import datetime
 
 api = openfoodfacts.API(user_agent="MyAwesomeApp/1.0")
 
@@ -40,15 +40,16 @@ def detect_and_decode_barcode(image):
 def push_to_db(text):
     try:
         connection = pymysql.connect(
-            host="192.168.0.131",
+            host="localhost",
             user="root",
             password="password",
             database="fridgefinds",
             charset='utf8mb4',
         )
         cur = connection.cursor()
-        sql = """insert into `Items` (iteminfo) values (%s)"""
-        cur.execute(sql,(text))
+        sql = """insert into `Barcodes` (iteminfo, timestamp) values (%s, %s)"""
+        data = (text, datetime.now())
+        cur.execute(sql,data)
         connection.commit()
         print("ADDED", text ,"TO DB!")
         connection.close()
